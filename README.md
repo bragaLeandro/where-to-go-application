@@ -128,12 +128,16 @@ A conexão com a API OpenAI é realizada utilizando a biblioteca openai-java, qu
 Exemplo da requisição em JAVA :
 
 ```java
-OpenAIApi openai = new OpenAIApi("seu_token_api");
-CompletionRequest request = new CompletionRequest.builder()
-    .prompt("Digite aqui o seu prompt")
-    .model("text-davinci-003")
-    .maxTokens(100)
-    .build();
-CompletionResponse response = openai.complete(request);
+    OpenAiService openai = new OpenAiService("seu_token_api");
+
+    public String sendMessageGpt(String message) {
+        CompletionRequest completionRequest = CompletionRequest.builder()
+                .prompt("Responda essa pergunta: " + message)
+                .maxTokens(2000)
+                .model("text-davinci-003")
+                .build();
+
+       return service.createCompletion(completionRequest).getChoices().get(0).getText();
+    }
 ```
 
