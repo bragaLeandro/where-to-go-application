@@ -26,10 +26,11 @@ public class MessageService {
     }
 
     public String sendMessage(Message message) {
-        String answer = gptService.sendMessageGpt(message.getQuestion());
-        message.setAnswer(answer);
-        messageRepository.save(message);
-        return answer;
+//        String answer = gptService.sendMessageGpt(message.getQuestion());
+//        message.setAnswer(answer);
+//        messageRepository.save(message);
+//        return answer;
+        return null;
     }
 
     public List<Message> getMessages() {
