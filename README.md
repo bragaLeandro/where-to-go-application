@@ -31,18 +31,15 @@ Conforme apresentado na Sprint 1, Where2Go é um aplicativo de planejamento de v
  **Requisição:**
   ```json
   {
-    {
   "clima": "quente",
   "transporte": "avião",
   "tempoMaximo": 7,
   "custoMaximo": 10000.00
 }
-  }
   ```
 
 **Resposta:** Em caso de sucesso, é retornada uma viagem personalizada, exemplo:
   ```json
-  {
 {
     "destino": "Rio de Janeiro",
     "pais": "Brasil",
@@ -143,7 +140,6 @@ Conforme apresentado na Sprint 1, Where2Go é um aplicativo de planejamento de v
     "duracaoViagem": "7 dias",
     "custo": 10000
 }
-  }
   ```
 - **Endpoint:** GET /message
 - **Descrição:** Este endpoint é utilizado para obter todas as mensagens enviadas pelo usuário atualmente autenticado.
