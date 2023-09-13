@@ -22,21 +22,129 @@ Conforme apresentado na Sprint 1, Where2Go é um aplicativo de planejamento de v
   
 **Resposta:** Caso a autenticação seja um sucesso, é retornado um JWT de autenticação com validade de 30 minutos.
 
-### 2.2 MessageController
+### 2.2 TripController
 
-- **Endpoint:** POST /message
-- **Descrição:** Este endpoint é utilizado para o usuário enviar uma mensagem.
-- **Corpo da Solicitação:** O corpo da solicitação deve ser um JSON contendo a mensagem do usuário.
+- **Endpoint:** POST /trip
+- **Descrição:** Este endpoint é utilizado para a aplicação gerar uma viagem de acordo com inputs de usuário.
+- **Corpo da Solicitação:** O corpo da solicitação deve ser um JSON contendo a as preferencias do usuário.
 
  **Requisição:**
   ```json
   {
-    "question": "quem é o dono da OpenAI?",
+    {
+  "clima": "quente",
+  "transporte": "avião",
+  "tempoMaximo": 7,
+  "custoMaximo": 10000.00
+}
   }
   ```
 
-**Resposta:** Em caso de sucesso, é retornada a resposta do modelo de inteligência artificial “text-davinci-003”
-
+**Resposta:** Em caso de sucesso, é retornada uma viagem personalizada, exemplo:
+  ```json
+  {
+{
+    "destino": "Rio de Janeiro",
+    "pais": "Brasil",
+    "atividadesPorDia": [
+        {
+            "dia": 1,
+            "atividades": [
+                {
+                    "nome": "Visitar o Cristo Redentor",
+                    "duracao": "2 horas"
+                },
+                {
+                    "nome": "Passear pela praia de Copacabana",
+                    "duracao": "3 horas"
+                }
+            ]
+        },
+        {
+            "dia": 2,
+            "atividades": [
+                {
+                    "nome": "Fazer um passeio de barco na Baía de Guanabara",
+                    "duracao": "4 horas"
+                },
+                {
+                    "nome": "Conhecer o Jardim Botânico",
+                    "duracao": "2 horas"
+                }
+            ]
+        },
+        {
+            "dia": 3,
+            "atividades": [
+                {
+                    "nome": "Fazer uma trilha no Parque Nacional da Tijuca",
+                    "duracao": "4 horas"
+                },
+                {
+                    "nome": "Visitar o Museu do Amanhã",
+                    "duracao": "3 horas"
+                }
+            ]
+        },
+        {
+            "dia": 4,
+            "atividades": [
+                {
+                    "nome": "Relaxar na praia de Ipanema",
+                    "duracao": "4 horas"
+                },
+                {
+                    "nome": "Conhecer o Pão de Açúcar",
+                    "duracao": "2 horas"
+                }
+            ]
+        },
+        {
+            "dia": 5,
+            "atividades": [
+                {
+                    "nome": "Fazer um tour pela Lapa",
+                    "duracao": "3 horas"
+                },
+                {
+                    "nome": "Praticar esportes na praia da Barra da Tijuca",
+                    "duracao": "4 horas"
+                }
+            ]
+        },
+        {
+            "dia": 6,
+            "atividades": [
+                {
+                    "nome": "Visitar o Maracanã",
+                    "duracao": "2 horas"
+                },
+                {
+                    "nome": "Conhecer o Museu Nacional de Belas Artes",
+                    "duracao": "3 horas"
+                }
+            ]
+        },
+        {
+            "dia": 7,
+            "atividades": [
+                {
+                    "nome": "Fazer um passeio de helicóptero pela cidade",
+                    "duracao": "1 hora"
+                },
+                {
+                    "nome": "Apreciar o pôr do sol no Arpoador",
+                    "duracao": "2 horas"
+                }
+            ]
+        }
+    ],
+    "hospedagem": "Hotel Copacabana, Quarto Duplo",
+    "duracaoViagem": "7 dias",
+    "custo": 10000
+}
+  }
+  ```
 - **Endpoint:** GET /message
 - **Descrição:** Este endpoint é utilizado para obter todas as mensagens enviadas pelo usuário atualmente autenticado.
 
@@ -68,8 +176,6 @@ Conforme apresentado na Sprint 1, Where2Go é um aplicativo de planejamento de v
   "name": "Leandro",
   "email": "neurotrix@fiap.com",
   "password": "teste123",
-  "dateOfBirth": "2002-09-21",
-  "role": "ADMIN"
 }
   ```
 
@@ -108,6 +214,8 @@ Para a autenticação do usuário, é utilizada a arquitetura de Spring Web Appl
 
 - **Autorização:** Além da autenticação, o token JWT também pode ser usado para autorização. Isso significa que ele pode conter informações sobre o que o usuário tem permissão para fazer no sistema (seus roles ou permissões), e o servidor pode verificar essas informações para garantir que o usuário só tenha acesso aos recursos apropriados.
 
+**Geração de viagens**: O sistema conta com os serviços da OpenAI para gerar viagens personalizadas para o cliente de acordo com as preferências.
+
 - **Finalização da sessão:** Se o usuário desejar fazer logout, o cliente simplesmente descarta o token JWT. Como o servidor não mantém um registro dos tokens emitidos, não há necessidade de uma solicitação de logout para o servidor.
 
 ## 8. Arquitetura da Aplicação
@@ -128,16 +236,32 @@ A conexão com a API OpenAI é realizada utilizando a biblioteca openai-java, qu
 Exemplo da requisição em JAVA :
 
 ```java
-    OpenAiService openai = new OpenAiService("seu_token_api");
+    OpenAiService openai = new OpenAiService("seu_token_api", Duration.ofSeconds(60));
+    public TripDto createOpenAiTrip(TripCreationDto tripCreationDto) {
+        List<ChatMessage> messages = Arrays.asList(
+                new ChatMessage(ChatMessageRole.SYSTEM.value(), PromptConstants.TRAVEL_INITIALIZER),
+                new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.TRAVEL_FORMAT),
+                new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.OUTPUT_RULES),
+                new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.OUTPUT_EXAMPLE),
+                new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.LINE_SEPARATOR),
+                new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.TRAVEL_CREATOR),
+                new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.TRAVEL_CLIMATE + tripCreationDto.getClime()),
+                new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.TRAVEL_COST + tripCreationDto.getMaxCost()),
+                new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.TRAVEL_TRANSPORT + tripCreationDto.getTransport()),
+                new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.MAX_DURATION + tripCreationDto.getMaxTime())
+        );
 
-    public String sendMessageGpt(String message) {
-        CompletionRequest completionRequest = CompletionRequest.builder()
-                .prompt("Responda essa pergunta: " + message)
-                .maxTokens(2000)
-                .model("text-davinci-003")
+        ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest
+                .builder()
+                .model("gpt-3.5-turbo")
+                .messages(messages)
+                .n(1)
+                .maxTokens(900)
                 .build();
 
-       return service.createCompletion(completionRequest).getChoices().get(0).getText();
+        String trip = this.replaceLineSeparator(service.createChatCompletion(chatCompletionRequest).getChoices().get(0).getMessage().getContent());
+
+        return MapperUtil.jsonToEntity(trip, TripDto.class);
     }
 ```
 
