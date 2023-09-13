@@ -1,5 +1,6 @@
 package br.com.fiap.controller;
 
+import br.com.fiap.dto.UserReqDto;
 import br.com.fiap.entity.User;
 import br.com.fiap.service.UserService;
 import jakarta.annotation.security.RolesAllowed;
@@ -21,8 +22,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> createUser(@RequestBody User user) {
-        //TODO: Work with dtos instead of entities
+    public ResponseEntity<?> createUser(@RequestBody UserReqDto user) {
         try {
             userService.createUser(user);
         } catch (IllegalArgumentException ie) {

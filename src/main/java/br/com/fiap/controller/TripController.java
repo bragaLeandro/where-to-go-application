@@ -29,4 +29,6 @@ public class TripController {
         logger.info("Calling Service(GET) /recipe");
         return tripService.createTrip(tripCreationDto);
     }
+
+    //TODO: SPRINT 4 -> GET TRIPS/ACTIVITIES BY USER
 }

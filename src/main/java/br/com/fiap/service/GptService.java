@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,7 +21,7 @@ import java.util.List;
 public class GptService {
 
     //TODO: Find a way to put this into a environment variable
-    private final OpenAiService service = new OpenAiService("");
+    private final OpenAiService service = new OpenAiService("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", Duration.ofSeconds(60));
 
     public TripDto createOpenAiTrip(TripCreationDto tripCreationDto) {
         List<ChatMessage> messages = Arrays.asList(
@@ -41,10 +42,12 @@ public class GptService {
                 .model("gpt-3.5-turbo")
                 .messages(messages)
                 .n(1)
-                .maxTokens(650)
+                .maxTokens(900)
                 .build();
 
         String trip = this.replaceLineSeparator(service.createChatCompletion(chatCompletionRequest).getChoices().get(0).getMessage().getContent());
+        System.out.println(tripCreationDto);
+
         System.out.println(trip);
         return MapperUtil.jsonToEntity(trip, TripDto.class);
     }

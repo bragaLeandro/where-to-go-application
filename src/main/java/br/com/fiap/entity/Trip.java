@@ -1,11 +1,21 @@
 package br.com.fiap.entity;
 
+import br.com.fiap.dto.DayActivitiesDto;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "TAB_TRIP")
 @SequenceGenerator(name="trip", sequenceName = "SQ_TB_TRIP", allocationSize = 1)
 public class Trip {
@@ -16,9 +26,17 @@ public class Trip {
     private String destination;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+    private String country;
+    private String accommodation;
+    private String travelDuration;
+    private BigDecimal cost;
 
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Activity> activities = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
@@ -69,5 +87,45 @@ public class Trip {
 
     public void setAttractions(List<Attraction> attractions) {
         this.attractions = attractions;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getAccommodation() {
+        return accommodation;
+    }
+
+    public void setAccommodation(String accommodation) {
+        this.accommodation = accommodation;
+    }
+
+    public String getTravelDuration() {
+        return travelDuration;
+    }
+
+    public void setTravelDuration(String travelDuration) {
+        this.travelDuration = travelDuration;
+    }
+
+    public BigDecimal getCost() {
+        return cost;
+    }
+
+    public void setCost(BigDecimal cost) {
+        this.cost = cost;
+    }
+
+    public List<Activity> getActivities() {
+        return activities;
+    }
+
+    public void setActivities(List<Activity> activities) {
+        this.activities = activities;
     }
 }

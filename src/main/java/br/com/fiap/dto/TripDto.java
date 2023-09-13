@@ -1,10 +1,15 @@
 package br.com.fiap.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
 
+@Data
+@RequiredArgsConstructor
 public class TripDto {
 
     @JsonProperty("destino")
