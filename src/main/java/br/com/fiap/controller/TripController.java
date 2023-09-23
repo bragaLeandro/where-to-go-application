@@ -3,14 +3,15 @@ package br.com.fiap.controller;
 import br.com.fiap.dto.TripCreationDto;
 import br.com.fiap.dto.TripDto;
 import br.com.fiap.entity.Trip;
+import br.com.fiap.entity.User;
 import br.com.fiap.service.TripService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/trip")
@@ -25,9 +26,16 @@ public class TripController {
     }
 
     @PostMapping
-    public TripDto createRecipe(@RequestBody @Valid TripCreationDto tripCreationDto) {
-        logger.info("Calling Service(GET) /recipe");
+    public TripDto createTrip(@RequestBody @Valid TripCreationDto tripCreationDto) {
+        logger.info("Calling Service(POST) /trip");
         return tripService.createTrip(tripCreationDto);
+    }
+
+    @GetMapping
+    public List<TripDto> findByUser() {
+        logger.info("Calling Service(GET) /trip");
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return tripService.findByUserId(user.getId());
     }
 
     //TODO: SPRINT 4 -> GET TRIPS/ACTIVITIES BY USER

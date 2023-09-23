@@ -1,5 +1,7 @@
 package br.com.fiap.service;
 
+import br.com.fiap.dto.ActivityDto;
+import br.com.fiap.dto.DayActivitiesDto;
 import br.com.fiap.dto.TripCreationDto;
 import br.com.fiap.dto.TripDto;
 import br.com.fiap.entity.Activity;
@@ -12,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -70,6 +73,45 @@ public class TripService {
         tripRepository.save(trip);
     }
 
+    public List<TripDto> findByUserId(Long id) {
+        User user = userService.findById(id);
+        List<Trip> trip = tripRepository.findAllByUser(user);
+        return trip.stream().map(this::convertToDto).collect(Collectors.toList());
+    }
 
+    public TripDto convertToDto(Trip trip) {
+        TripDto tripDto = new TripDto();
+        tripDto.setCost(trip.getCost());
+        tripDto.setCountry(trip.getCountry());
+        tripDto.setDestination(trip.getDestination());
+        tripDto.setTravelDuration(trip.getTravelDuration());
+        tripDto.setAccommodation(trip.getAccommodation());
+
+        Map<Integer, List<Activity>> activitiesByDay = trip.getActivities().stream()
+                .collect(Collectors.groupingBy(Activity::getDay));
+
+        List<DayActivitiesDto> dayActivitiesDtos = activitiesByDay.entrySet().stream()
+                .map(entry -> {
+                    DayActivitiesDto dayActivitiesDto = new DayActivitiesDto();
+                    dayActivitiesDto.setDay(entry.getKey());
+
+                    List<ActivityDto> activityDtos = entry.getValue().stream()
+                            .map(activity -> {
+                                ActivityDto activityDto = new ActivityDto();
+                                activityDto.setName(activity.getName());
+                                activityDto.setDuration(activity.getDuration());
+                                return activityDto;
+                            })
+                            .collect(Collectors.toList());
+
+                    dayActivitiesDto.setActivities(activityDtos);
+                    return dayActivitiesDto;
+                })
+                .collect(Collectors.toList());
+
+        tripDto.setActivities(dayActivitiesDtos);
+
+        return tripDto;
+    }
 
 }
