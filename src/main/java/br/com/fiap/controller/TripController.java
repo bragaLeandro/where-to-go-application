@@ -5,9 +5,11 @@ import br.com.fiap.dto.TripDto;
 import br.com.fiap.entity.Trip;
 import br.com.fiap.entity.User;
 import br.com.fiap.service.TripService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,5 +40,14 @@ public class TripController {
         return tripService.findByUserId(user.getId());
     }
 
-    //TODO: SPRINT 4 -> GET TRIPS/ACTIVITIES BY USER
+    @GetMapping("/{tripId}")
+    public ResponseEntity<TripDto> findByUserAndTripId(@PathVariable Long tripId) {
+        logger.info("Calling Service(GET) /trip/{}", tripId);
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        try {
+            return ResponseEntity.ok(tripService.findByUserAndTripId(user.getId(), tripId));
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

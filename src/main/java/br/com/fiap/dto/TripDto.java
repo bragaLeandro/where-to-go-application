@@ -12,6 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TripDto {
 
+    private Long id;
     @JsonProperty("destino")
     private String destination;
     @JsonProperty("pais")

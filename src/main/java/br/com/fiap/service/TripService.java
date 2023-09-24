@@ -8,6 +8,7 @@ import br.com.fiap.entity.Activity;
 import br.com.fiap.entity.Trip;
 import br.com.fiap.entity.User;
 import br.com.fiap.repository.TripRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,13 +38,14 @@ public class TripService {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         TripDto trip = gptService.createOpenAiTrip(tripCreationDto);
+        Trip persistedTrip = this.saveTrip(trip, user.getId());
+        trip.setId(persistedTrip.getId());
 
-        this.saveTrip(trip, user.getId());
         return trip;
     }
 
     @Transactional
-    private void saveTrip(TripDto tripDto, Long userId) {
+    private Trip saveTrip(TripDto tripDto, Long userId) {
         User user = userService.findById(userId);
 
         Trip trip = Trip.builder()
@@ -65,22 +67,29 @@ public class TripService {
                                         .trip(trip)
                                         .build()
                         )
-                )
-                .collect(Collectors.toList());
+                ).toList();
 
         trip.setActivities(activities);
 
-        tripRepository.save(trip);
+        return tripRepository.save(trip);
     }
 
     public List<TripDto> findByUserId(Long id) {
         User user = userService.findById(id);
         List<Trip> trip = tripRepository.findAllByUser(user);
-        return trip.stream().map(this::convertToDto).collect(Collectors.toList());
+        return trip.stream().map(this::convertToDto).toList();
+    }
+
+    public TripDto findByUserAndTripId(Long userId, Long tripId) {
+        User user = userService.findById(userId);
+        Trip trip = tripRepository.findByUserAndId(user, tripId)
+                .orElseThrow(() -> new EntityNotFoundException("Viagem não existe"));
+        return this.convertToDto(trip);
     }
 
     public TripDto convertToDto(Trip trip) {
         TripDto tripDto = new TripDto();
+        tripDto.setId(trip.getId());
         tripDto.setCost(trip.getCost());
         tripDto.setCountry(trip.getCountry());
         tripDto.setDestination(trip.getDestination());
@@ -101,13 +110,11 @@ public class TripService {
                                 activityDto.setName(activity.getName());
                                 activityDto.setDuration(activity.getDuration());
                                 return activityDto;
-                            })
-                            .collect(Collectors.toList());
+                            }).toList();
 
                     dayActivitiesDto.setActivities(activityDtos);
                     return dayActivitiesDto;
-                })
-                .collect(Collectors.toList());
+                }).toList();
 
         tripDto.setActivities(dayActivitiesDtos);
 
