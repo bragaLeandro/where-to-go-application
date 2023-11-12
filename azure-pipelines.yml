@@ -15,7 +15,7 @@ stages:
       inputs:
         versionSpec: '17'
         jdkArchitectureOption: 'x64'
-        jdkSourceOption: 'PreInstalled'
+        jdkSourceOption: 'AzureStorage'
 
     - script: |
         chmod +x gradlew
