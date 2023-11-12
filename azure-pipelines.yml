@@ -39,7 +39,8 @@ stages:
   condition: succeeded()
   jobs:
   - deployment: Deploy
-    pool:
+    pool: 
+      name: "Leandro"
       vmImage: 'ubuntu-latest'
     environment: 'Production'
     strategy:
