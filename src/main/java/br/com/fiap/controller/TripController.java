@@ -28,9 +28,14 @@ public class TripController {
     }
 
     @PostMapping
-    public TripDto createTrip(@RequestBody @Valid TripCreationDto tripCreationDto) {
+    public ResponseEntity<?> createTrip(@RequestBody @Valid TripCreationDto tripCreationDto) {
         logger.info("Calling Service(POST) /trip");
-        return tripService.createTrip(tripCreationDto);
+        try {
+            return ResponseEntity.ok(tripService.createTrip(tripCreationDto));
+        } catch(Exception ex) {
+            ex.printStackTrace();
+            return ResponseEntity.internalServerError().body(ex.getMessage());
+        }
     }
 
     @GetMapping
@@ -38,6 +43,12 @@ public class TripController {
         logger.info("Calling Service(GET) /trip");
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return tripService.findByUserId(user.getId());
+    }
+
+    @GetMapping("/all")
+    public List<TripDto> findByAll() {
+        logger.info("Calling Service(GET) /trip");
+        return tripService.findAll();
     }
 
     @GetMapping("/{tripId}")
@@ -49,5 +60,13 @@ public class TripController {
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @DeleteMapping("/{tripId}")
+    public ResponseEntity<?> deleteTrip(@PathVariable Long tripId) {
+        logger.info("Calling Service(DELETE) /trip/{}", tripId);
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        tripService.deleteById(tripId);
+        return ResponseEntity.ok().build();
     }
 }

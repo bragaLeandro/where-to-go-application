@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -22,5 +24,11 @@ public class TripCreationDto {
     private Integer maxTime;
     @JsonProperty("custoMaximo")
     private BigDecimal maxCost;
+    private String destino;
+    @JsonProperty("dataInicio")
+    private LocalDate startDate;
+    @JsonProperty("dataFim")
+    private LocalDate endDate;
+
 
 }

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -25,4 +26,9 @@ public class TripDto {
     private String travelDuration;
     @JsonProperty("custo")
     private BigDecimal cost;
+    @JsonProperty("dataInicio")
+    private LocalDate startDate;
+    @JsonProperty("dataFim")
+    private LocalDate endDate;
+
 }

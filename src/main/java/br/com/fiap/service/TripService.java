@@ -55,6 +55,8 @@ public class TripService {
                 .travelDuration(tripDto.getTravelDuration())
                 .cost(tripDto.getCost())
                 .user(user)
+                .startDate(tripDto.getStartDate())
+                .endDate(tripDto.getEndDate())
                 .build();
 
         List<Activity> activities = tripDto.getActivities().stream()
@@ -95,6 +97,8 @@ public class TripService {
         tripDto.setDestination(trip.getDestination());
         tripDto.setTravelDuration(trip.getTravelDuration());
         tripDto.setAccommodation(trip.getAccommodation());
+        tripDto.setStartDate(trip.getStartDate());
+        tripDto.setEndDate(trip.getEndDate());
 
         Map<Integer, List<Activity>> activitiesByDay = trip.getActivities().stream()
                 .collect(Collectors.groupingBy(Activity::getDay));
@@ -120,5 +124,12 @@ public class TripService {
 
         return tripDto;
     }
+    public List<TripDto> findAll() {
+        List<Trip> trip = tripRepository.findAll();
+        return trip.stream().map(this::convertToDto).toList();
+    }
 
+    public void deleteById(Long id) {
+        tripRepository.deleteById(id);
+    }
 }

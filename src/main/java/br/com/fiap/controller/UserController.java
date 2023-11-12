@@ -6,6 +6,7 @@ import br.com.fiap.service.UserService;
 import jakarta.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,9 +32,32 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping()
+    public ResponseEntity<?> editUser(@RequestBody UserReqDto user) {
+        try {
+            userService.editUser(user);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException ie) {
+            return ResponseEntity.badRequest().body(ie.getMessage());
+        }
+    }
+
+    @GetMapping()
+    public ResponseEntity<?> getUserDetails() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        try {
+            return ResponseEntity.ok(userService.findUserDetails(user.getId()));
+        } catch (IllegalArgumentException ie) {
+            return ResponseEntity.badRequest().body(ie.getMessage());
+        }
+    }
+
     @GetMapping("/all")
-    @RolesAllowed("ADMIN")
-    public List<User> findAll() {
-        return userService.findAll();
+    public ResponseEntity<?> getAllUsers() {
+        try {
+            return ResponseEntity.ok(userService.findAllUsersDetails());
+        } catch (IllegalArgumentException ie) {
+            return ResponseEntity.badRequest().body(ie.getMessage());
+        }
     }
 }
