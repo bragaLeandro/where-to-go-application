@@ -54,7 +54,7 @@ stages:
 
           - task: AzureWebApp@1
             inputs:
-              azureSubscription: $(AZURE_SUBSCRIPTION)
+              azureSubscription: 'c575404e-7d3e-4077-822b-96604bc2fd19'
               appName: 'wheretogoapplication'
               appType: webApp
               slotName: 'Production'
