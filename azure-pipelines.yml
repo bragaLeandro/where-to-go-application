@@ -11,11 +11,14 @@ stages:
     steps:
     - checkout: self
 
-    - task: JavaToolInstaller@0
-      inputs:
-        versionSpec: '17'
-        jdkArchitectureOption: 'x64'
-        jdkSourceOption: 'AzureStorage'
+- script: |
+    if (!(java -version 2>&1 | Select-String "17")) {
+      choco install openjdk17 -y
+    }
+  displayName: 'Install Java 17 if not present'
+  env:
+    JAVA_HOME: 'C:\Program Files\OpenJDK\jdk-17\'
+    PATH: '$(JAVA_HOME)\bin;$(PATH)'
 
     - script: |
         chmod +x gradlew
