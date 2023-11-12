@@ -2,7 +2,7 @@ trigger:
 - master
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: "Leandro"
 
 stages:
 - stage: Build
@@ -41,7 +41,6 @@ stages:
   - deployment: Deploy
     pool: 
       name: "Leandro"
-      vmImage: 'ubuntu-latest'
     environment: 'Production'
     strategy:
       runOnce:
