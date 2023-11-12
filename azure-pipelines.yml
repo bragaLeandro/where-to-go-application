@@ -12,13 +12,9 @@ stages:
     - checkout: self
 
     - script: |
-        if (!(java -version 2>&1 | Select-String "17")) {
-          choco install openjdk17 -y
-        }
-      displayName: 'Install Java 17 if not present'
-      env:
-        JAVA_HOME: 'C:\Program Files\Java\jdk-17.0.6\'
-        PATH: '$(JAVA_HOME)\bin;$(PATH)'
+        java -version
+      displayName: 'Check Java version'
+      continueOnError: true
 
     - script: |
         chmod +x gradlew
