@@ -17,10 +17,9 @@ stages:
         jdkArchitectureOption: 'x64'
         jdkSourceOption: 'PreInstalled'
 
-    - script: chmod +x gradlew
-      displayName: 'Grant execute permission for gradlew'
-
-    - script: ./gradlew build
+    - script: |
+        chmod +x gradlew
+        ./gradlew build
       displayName: 'Build with Gradle'
       env:
         SPRING_DATASOURCE_URL: $(SPRING_DATASOURCE_URL)
