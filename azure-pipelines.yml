@@ -1,0 +1,61 @@
+trigger:
+- master
+
+pool:
+  name: "Leandro"
+
+stages:
+- stage: Build
+  jobs:
+  - job: Build
+    steps:
+    - checkout: self
+
+    - script: |
+        java -version
+      displayName: 'Check Java version'
+      continueOnError: true
+
+    - script: |
+        chmod +x gradlew
+        ./gradlew build
+      displayName: 'Build with Gradle'
+      env:
+        SPRING_DATASOURCE_URL: $(SPRING_DATASOURCE_URL)
+        SPRING_DATASOURCE_USERNAME: $(SPRING_DATASOURCE_USERNAME)
+        SPRING_DATASOURCE_PASSWORD: $(SPRING_DATASOURCE_PASSWORD)
+        SPRING_JWT_SECRET: $(SPRING_JWT_SECRET)
+        OPENAI_API_KEY: $(OPENAI_API_KEY)
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: './build/libs/security-0.0.1-SNAPSHOT.jar'
+        ArtifactName: 'java-app'
+        publishLocation: 'Container'
+
+- stage: Deploy
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: Deploy
+    pool: 
+      name: "Leandro"
+    environment: 'Production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'java-app'
+              downloadPath: '$(System.ArtifactsDirectory)'
+
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'Azure for Students(c575404e-7d3e-4077-822b-96604bc2fd19)'
+              appName: 'wheretogoapplication'
+              appType: webApp
+              slotName: 'Production'
+              package: '$(System.ArtifactsDirectory)/java-app/security-0.0.1-SNAPSHOT.jar'
