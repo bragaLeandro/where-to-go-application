@@ -54,7 +54,8 @@ stages:
 
           - task: AzureWebApp@1
             inputs:
-              appName: 'wheretogofiap'
+              azureSubscription: $(AZURE_SUBSCRIPTION)
+              appName: 'wheretogoapplication'
+              appType: webApp
               slotName: 'Production'
-              publishProfile: $(AZUREAPPSERVICE_PUBLISHPROFILE_BCA5B4788EA9434B9B9686A924042AE6)
               package: '$(System.ArtifactsDirectory)/java-app/security-0.0.1-SNAPSHOT.jar'
