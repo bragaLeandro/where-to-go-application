@@ -17,7 +17,7 @@ stages:
         }
       displayName: 'Install Java 17 if not present'
       env:
-        JAVA_HOME: 'C:\Program Files\Java\jdk-17\'
+        JAVA_HOME: 'C:\Program Files\Java\jdk-17.0.6\'
         PATH: '$(JAVA_HOME)\bin;$(PATH)'
 
     - script: |
