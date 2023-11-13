@@ -31,11 +31,14 @@ Conforme apresentado na Sprint 1, Where2Go é um aplicativo de planejamento de v
  **Requisição:**
   ```json
   {
-  "clima": "quente",
+  "clima": "frio",
   "transporte": "avião",
-  "tempoMaximo": 7,
-  "custoMaximo": 10000.00
-}
+  "tempoMaximo": 5,
+  "custoMaximo": 10000.00,
+  "destino":"africa do sul",
+  "dataInicio": "2023-10-27",
+  "dataFim": "2023-11-03"
+  }
   ```
 
 **Resposta:** Em caso de sucesso, é retornada uma viagem personalizada, exemplo:
@@ -138,7 +141,9 @@ Conforme apresentado na Sprint 1, Where2Go é um aplicativo de planejamento de v
     ],
     "hospedagem": "Hotel Copacabana, Quarto Duplo",
     "duracaoViagem": "7 dias",
-    "custo": 10000
+    "custo": 10000,
+    "dataInicio": "2023-10-27",
+    "dataFim": "2023-11-03"
 }
   ```
 - **Endpoint:** GET /message
@@ -146,19 +151,19 @@ Conforme apresentado na Sprint 1, Where2Go é um aplicativo de planejamento de v
 
  **Requisição:**
   ```URL
-   GET http://localhost:8080/message/
+   GET http://localhost:8080/trip/
   ```
-**Resposta:** Em caso de sucesso, retorna uma lista de mensagens enviadas pelo usuário com as respostas do modelo de inteligência artificial.
+**Resposta:** Em caso de sucesso, retorna uma lista de viagens criada para o usuário previamente com o modelo de inteligência artificial.
 
-- **Endpoint:** DELETE /message/{id}
-- **Descrição:** Este endpoint é utilizado para deletar uma mensagem específica do usuário autenticado. 
-- **Parâmetros de Caminho:** ID da mensagem a ser deletada.
+- **Endpoint:** DELETE /trip/{id}
+- **Descrição:** Este endpoint é utilizado para deletar uma viagem específica do usuário autenticado. 
+- **Parâmetros de Caminho:** ID da viagem a ser deletada.
 
  **Requisição:**
   ```URL
-   DELETE http://localhost:8080/message/{id}
+   DELETE http://localhost:8080/trip/{id}
   ```
-**Resposta:** Retorna 200 OK se a mensagem for deletada com sucesso. Retorna 404 Not Found se a mensagem não for encontrada.
+**Resposta:** Retorna 200 OK se a mensagem for deletada com sucesso. Retorna 404 Not Found se a viagem não for encontrada.
 
 ### 2.3 UserController
 
@@ -169,16 +174,37 @@ Conforme apresentado na Sprint 1, Where2Go é um aplicativo de planejamento de v
  **Requisição:**
   ```json
 {
-  "name": "Leandro",
-  "email": "neurotrix@fiap.com",
-  "password": "teste123",
+  "name": "Felipe",
+  "email": "felipe1@fiap.com",
+  "password": "teste1233",
+  "cpf": "45213085803",
+  "cellphone": "11982769048",
+  "description": "Sou um cara legal :)"
 }
   ```
 
 **Resposta:** Retorna 200 OK caso o usuário seja criado corretamente
 
+- **Endpoint:** PUT /user/register
+- **Descrição:** Este endpoint é utilizado para atualizar as informações do usuário.
+- **Corpo da Solicitação:** O corpo da solicitação deve ser um JSON contendo as informações do usuário (nome, login, senha, etc.).
+
+ **Requisição:**
+  ```json
+{
+  "name": "Felipe",
+  "email": "felipe1@fiap.com",
+  "password": "teste1233",
+  "cpf": "45213085803",
+  "cellphone": "11982769048",
+  "description": "Sou um cara legal :)"
+}
+  ```
+
+**Resposta:** Retorna 200 OK caso o usuário seja editado corretamente
+
 - **Endpoint:** GET /user/all 
-- **Descrição:** Este endpoint é utilizado para obter uma lista de todos os usuários. Este endpoint está disponível apenas para usuários com a role "ADMIN". 
+- **Descrição:** Este endpoint é utilizado para obter uma lista de todos os usuários, com seus nomes e emails.
 
  **Requisição:**
   ```URL
@@ -186,15 +212,6 @@ Conforme apresentado na Sprint 1, Where2Go é um aplicativo de planejamento de v
   ```
   
 **Resposta:** Em caso de sucesso, retorna uma lista de todos os usuários.
-
-## 3. Implementações futuras
-
-Algumas das implementações futuras previstas para a aplicação incluem:
-
-- Melhor integração com o GPT-3 para fornecer itinerários de viagem mais detalhados e personalizados.
-- Implementação de uma interface de usuário mais amigável e intuitiva.
-- Integração com APIs de companhias aéreas e hotéis para reservar voos e acomodações diretamente através do aplicativo.
-- Implementação de um sistema de feedback para os usuários avaliarem seus itinerários e sugerirem melhorias.
 
 ## 4. Arquitetura da solução
 
@@ -214,27 +231,30 @@ Para a autenticação do usuário, é utilizada a arquitetura de Spring Web Appl
 
 - **Finalização da sessão:** Se o usuário desejar fazer logout, o cliente simplesmente descarta o token JWT. Como o servidor não mantém um registro dos tokens emitidos, não há necessidade de uma solicitação de logout para o servidor.
 
-## 8. Arquitetura da Aplicação
+![Arquitetura da Solucao](./img/arquitetura-solucao.png)
 
-A arquitetura do Where2Go é baseada na arquitetura de microserviços, o que permite a escalabilidade e a manutenção independentes dos serviços. O aplicativo é composto por vários serviços independentes que se comunicam entre si.
-
-Os componentes principais da arquitetura são:
-
-- Serviço de Autenticação
-- Serviço de Planejamento de Viagens
-- Serviço de Persistência de Dados
-- Serviço de Integração com a API OpenAI
-
-## 9. Conexão com a API OpenAI
+## 8. Conexão com a API OpenAI
 
 A conexão com a API OpenAI é realizada utilizando a biblioteca openai-java, que permite realizar requisições POST à API, especificando o prompt, o modelo e os tokens máximos.
 
-Exemplo da requisição em JAVA :
+Exemplo da classe em JAVA :
 
 ```java
-    OpenAiService openai = new OpenAiService("seu_token_api", Duration.ofSeconds(60));
+@Service
+@Slf4j
+public class GptService {
+
+    @Value("${openai.api.key}")
+    private String apiKey;
+    private OpenAiService service;
+
+    @PostConstruct
+    public void init() {
+        this.service = new OpenAiService(apiKey, Duration.ofSeconds(60));
+    }
+
     public TripDto createOpenAiTrip(TripCreationDto tripCreationDto) {
-        List<ChatMessage> messages = Arrays.asList(
+        List<ChatMessage> messages = new ArrayList<>(List.of(
                 new ChatMessage(ChatMessageRole.SYSTEM.value(), PromptConstants.TRAVEL_INITIALIZER),
                 new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.TRAVEL_FORMAT),
                 new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.OUTPUT_RULES),
@@ -244,8 +264,15 @@ Exemplo da requisição em JAVA :
                 new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.TRAVEL_CLIMATE + tripCreationDto.getClime()),
                 new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.TRAVEL_COST + tripCreationDto.getMaxCost()),
                 new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.TRAVEL_TRANSPORT + tripCreationDto.getTransport()),
-                new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.MAX_DURATION + tripCreationDto.getMaxTime())
-        );
+                new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.MAX_DURATION + tripCreationDto.getMaxTime()),
+                new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.START_DATE + tripCreationDto.getStartDate()),
+                new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.END_DATE + tripCreationDto.getEndDate())
+        ));
+
+        if (null != tripCreationDto.getDestino()) {
+            ChatMessage destiny = new ChatMessage(ChatMessageRole.USER.value(), PromptConstants.DESTINY + tripCreationDto.getDestino());
+            messages.add(destiny);
+        }
 
         ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest
                 .builder()
@@ -256,8 +283,56 @@ Exemplo da requisição em JAVA :
                 .build();
 
         String trip = this.replaceLineSeparator(service.createChatCompletion(chatCompletionRequest).getChoices().get(0).getMessage().getContent());
-
+        log.info(trip);
         return MapperUtil.jsonToEntity(trip, TripDto.class);
     }
+}
 ```
+
+## 9. Pipeline de CI/CD para Aplicação Java com Azure Pipelines
+
+### Visão Geral
+Como configurar e executar a pipeline de integração contínua e entrega contínua (CI/CD) para uma aplicação Java que interage com a API da OpenAI para gerar viagens, utilizando Azure Pipelines.
+
+### Pré-requisitos
+- Conta no Azure DevOps.
+- Projeto no Azure DevOps configurado com o repositório do código-fonte.
+- Agente de build configurado (self-hosted ou hospedado pela Microsoft).
+- Java JDK 17 instalado no agente de build.
+- Acesso à API da OpenAI (chave de API).
+
+### Configuração do Ambiente
+9.1. **Configurar Variáveis de Ambiente:**
+   - `SPRING_DATASOURCE_URL`: URL do banco de dados.
+   - `SPRING_DATASOURCE_USERNAME`: Nome de usuário do banco de dados.
+   - `SPRING_DATASOURCE_PASSWORD`: Senha do banco de dados.
+   - `SPRING_JWT_SECRET`: Chave secreta para JWT.
+   - `OPENAI_API_KEY`: Chave de API da OpenAI.
+
+9.2. **Configurar Azure Web App:**
+   - Crie um Web App no Azure para hospedar a aplicação.
+   - O nome do Web App deve ser o mesmo que o utilizado em appName. EX: appName: 'wheretogoapplication'
+   - Configure o azure subscription de acordo com o nome da sua assinataura. EX: azureSubscription: 'Azure for Students(c575404e-7d3e-4077-822b-96604bc2fd19)'.
+
+### Executando a Pipeline
+9.3. **Push ou Pull Request no Branch Master:**
+   - A pipeline é acionada automaticamente em qualquer push ou pull request para o branch `master`.
+
+9.4. **Etapas da Pipeline:**
+   - **Build:**
+     - Executa testes.
+     - Compila o código.
+     - Gera artefatos de build.
+   - **Deploy:**
+     - Baixa os artefatos de build.
+     - Realiza o deploy no Azure Web App.
+
+9.5. **Monitoramento:**
+   - Verifique o status da pipeline no Azure DevOps.
+   - Em caso de falhas, consulte os logs para diagnóstico.
+
+### Troubleshooting
+- **Falhas de Build:** Verifique os logs de build para erros de compilação ou falhas de teste.
+- **Problemas de Deploy:** Certifique-se de que todas as configurações do Azure Web App estão corretas.
+- **Variáveis de Ambiente:** Confirme se todas as variáveis de ambiente necessárias estão configuradas corretamente no Azure DevOps e no Web App.
 
