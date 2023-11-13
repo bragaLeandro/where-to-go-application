@@ -17,8 +17,7 @@ stages:
       continueOnError: true
 
     - script: |
-        chmod +x gradlew
-        ./gradlew build
+        gradlew.bat build
       displayName: 'Build with Gradle'
       env:
         SPRING_DATASOURCE_URL: $(SPRING_DATASOURCE_URL)
@@ -26,6 +25,10 @@ stages:
         SPRING_DATASOURCE_PASSWORD: $(SPRING_DATASOURCE_PASSWORD)
         SPRING_JWT_SECRET: $(SPRING_JWT_SECRET)
         OPENAI_API_KEY: $(OPENAI_API_KEY)
+    - script: |
+        echo "$(SPRING_DATASOURCE_URL)"
+        echo "$(SPRING_DATASOURCE_USERNAME)"
+      displayName: 'Print variables'
 
     - task: PublishBuildArtifacts@1
       inputs:
