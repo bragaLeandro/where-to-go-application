@@ -326,6 +326,8 @@ Como configurar e executar a pipeline de integração contínua e entrega contí
    - **Deploy:**
      - Baixa os artefatos de build.
      - Realiza o deploy no Azure Web App.
+    
+![Arquitetura do Pipeline](./img/arquitetura-pipeline.png)
 
 9.5. **Monitoramento:**
    - Verifique o status da pipeline no Azure DevOps.
